@@ -4,14 +4,35 @@
 <title>6.MITx d3 activity - MIT dorm pressure survey</title>
 
 <style>
+/*
 .chart rect {
   fill: steelblue;
 }
+*/
 
 .chart text {
-  fill: white;
-  font: 10px sans-serif;
+    fill: black;
+    font: 12px sans-serif;
+    text-shadow: 1px 1px #ffffff;
+
 }
+    
+rect:hover{
+    fill: black;
+}
+    
+.happy {
+    fill: dimgrey;   
+}
+    
+.ex {
+    fill: darkgrey;
+}
+    
+.workLife {
+    fill: grey;
+}
+
 </style>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -51,17 +72,109 @@ var mitPressureSurvey = [
 {dorm: 'Westgate', happierThanAvg: 43, extroverted: 30, workLifeBalance: 43}
 ]
 
-var width = 420
+var mitPressure = [{thing: "Happier Than Average", css:"happy"}, 
+                   {thing: "Extroverted", css:"ex"}, 
+                   {thing: "Work Life Balance", css:"workLife"}];
+
+//mitPressureSurvey.sort(function(a,b) {return parseFloat(a.happierThanAvg) - parseFloat(b.happierThanAvg)});
+
+var width = 420;
 var barHeight = 20;
 
 // utility function that maps [0 to 100] to [0, width]
 // draw this on the board as a map of two lines
 var scaleFunction = d3.scale.linear().domain([0, 100]).range([0, width]);
 
-
+    
 // jQuery magic to run this code after your page loads
 $(function() {
-  // insert your code here
+    
+    var leg = d3.select("#legend")
+                .attr("weight", width)
+                .attr("height", 3*barHeight +20 );
+    var binding2 = leg.selectAll("g").data(mitPressure);
+    var bar2 = binding2.enter()
+                        .append("g")
+                        .attr("transform", function(d, i){
+                            return "translate(0, " + i *barHeight + ")";
+                        })
+    
+    bar2.append("rect")
+        .attr("class", function(d){
+            return d.css;
+        })
+        .attr("id", function(d) {
+            return d.css;   
+        })
+        .attr("width", barHeight - 1)
+        .attr("height", barHeight - 1)
+        .on('click', function(d) {
+            console.log(d);
+        })
+    
+    bar2.append("text")
+        .attr("x", barHeight + 3)
+        .attr("y", barHeight / 2 + 3)
+        .text( function(d) {return d.thing});
+    
+    
+    
+    
+    
+    
+    var chart = d3.select("#d3chart")
+                .attr("weight", width)
+                .attr("height", (barHeight * 3 + 5) * mitPressureSurvey.length);
+    
+    //binding
+    var binding = chart.selectAll("g").data(mitPressureSurvey, function(d) {
+        return d.dorm;   
+    });
+    var bar = binding.enter()
+            .append("g")
+            .attr("transform", function(d, i){
+                return "translate(0, " + (i * 3 * (barHeight + 5)) + ")";   
+            })  
+    
+    bar.append("rect")
+        .attr("class", "happy")
+        .attr("width", function(d) {return scaleFunction(d.happierThanAvg) ;})
+        .attr("height", barHeight - 1)
+    
+    bar.append("rect")
+        .attr("class", "ex")
+        .attr("width", function(d) {return scaleFunction(d.extroverted);})
+        .attr("height", barHeight - 1)
+        .attr("y", barHeight);
+    
+    bar.append("rect")
+        .attr("class", "workLife")
+        .attr("width", function(d) {return scaleFunction(d.workLifeBalance);})
+        .attr("height", barHeight - 1)
+        .attr("y", barHeight * 2);
+          
+    
+    bar.append("text")
+        .attr("x", 3)
+        .attr("y", barHeight / 2 + 3)
+        .text( function(d) {return d.dorm;});
+    
+    
+    bar.append("text")
+        .attr("x", function(d){return scaleFunction(d.happierThanAvg) + 3;})
+        .attr("y", barHeight / 2 + 3)
+        .text( function(d) {return d.happierThanAvg;});
+    
+    bar.append("text")
+        .attr("x", function(d){return scaleFunction(d.extroverted) + 3;})
+        .attr("y", barHeight * 3 / 2 + 3)
+        .text( function(d) {return d.extroverted;});
+    
+    bar.append("text")
+        .attr("x", function(d){return scaleFunction(d.workLifeBalance) + 3;})
+        .attr("y", barHeight *5 / 2 + 3)
+        .text( function(d) {return d.workLifeBalance;});
+    
 });
 
 </script>
@@ -70,6 +183,8 @@ $(function() {
 <body>
 
 <h1>MIT pressure survey visualization</h1>
+    
+<svg class="chart" id="legend"></svg>
 
 <svg class="chart" id="d3chart"></svg>
 
