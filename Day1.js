@@ -8,7 +8,7 @@ var calculator = (function () {
         try{
             var val = evaluation(tokens)
             if (tokens.length > 0){
-                throw "ill-formed expression";   
+                throw "ill-formed expression";   //throw New Error "message" <-something like that 
             }
             return String(val);
         }
